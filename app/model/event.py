@@ -1,5 +1,27 @@
-class Event:
-    def __init__(self, event_name: str=None, metadata: object=None, timestamp_utc: int=None):
-        self.event_name = event_name
+from marshmallow import Schema, fields, validate
+
+
+class Events:
+    def __init__(self, eventName, metadata, timestampUTC):
+        self.eventName = eventName
         self.metadata = metadata
-        self.timestamp_utc = timestamp_utc
+        self.timestampUTC = timestampUTC
+
+
+class EventsSchema(Schema):
+    eventName = fields.String(
+        required=True,
+        error_messages={"required": {"message": "eventName required", "code": 400}},
+    )
+    metadata = fields.List(
+        fields.String(),
+        required=True,
+        validates=validate.Length(min=1),
+        error_messages={
+            "required": {"message": "At least one metadata is required", "code": 400}
+        },
+    )
+    timestampUTC = fields.Integer(
+        required=True,
+        error_messages={"required": {"message": "timestampUTC required", "code": 400}},
+    )

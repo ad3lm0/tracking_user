@@ -1,18 +1,23 @@
-import util
+from marshmallow import Schema, fields, validate
 
-class Alias:
-    def __init__(self, new_user_id: str=None, original_user_id: str=None, timestamp_utc: int=None):
-        self.new_user_id = new_user_id
-        self.original_user_id = original_user_id
-        self.timestamp_utc = timestamp_utc
 
-    @classmethod
-    def from_dict(cls, dikt) -> 'Alias':
-        """Returns the dict as a model
+class AliasBody:
+    def __init__(self, newUserId, originalUserId, timestampUTC):
+        self.newUserId = newUserId
+        self.originalUserId = originalUserId
+        self.timestampUTC = timestampUTC
 
-        :param dikt: A dict.
-        :type: dict
-        :return: The alias of this Alias.
-        :rtype: Alias
-        """
-        return util.deserialize_model(dikt, cls)
+
+class AliasBodySchema(Schema):
+    newUserId = fields.String(
+        required=True,
+        validate=validate.Length(min=1, error="Field should not be empty."),
+    )
+    originalUserId = fields.String(
+        required=True,
+        validate=validate.Length(min=1, error="Field should not be empty."),
+    )
+    timestampUTC = fields.String(
+        required=True,
+        validate=validate.Length(min=1, error="Field should not be empty."),
+    )
