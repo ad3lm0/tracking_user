@@ -1,0 +1,111 @@
+openapi: 3.0.0
+info:
+  title: Tracking API
+  description: |-
+
+    There is no authentication needed for this server.
+  version: "0.1"
+servers:
+- url: /
+paths:
+  /track:
+    post:
+      summary: Log events related with a particular user
+      description: |-
+        In order to log an event you will be required to provide an userId and 
+        an eventName. You can add more metadata to the log depending on the
+        kind of event that you are logging.
+      operationId: track_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/trackBody'
+        required: true
+      responses:
+        "200":
+          description: OK
+      x-openapi-router-controller: tracking_server.controllers.default_controller
+  /alias:
+    post:
+      summary: Assotiate different identifiers to the same entity.
+      description: "Set up a link between the events registered with different userIds.\
+        \ \n\nFor example when a user arrives to your website and you start to log\
+        \  events, you may want to associate the events with a generated ID  that\
+        \ is associated with a cookie. Then, say the user registers and the email\
+        \ address becomes known which means that we now have the ability to associate\
+        \ the previous browsing events with an email address.\n\nAt this point you\
+        \ would issue the request with the `newUserId` set to the email address and\
+        \ the `originalUserId` set to the originally generated ID."
+      operationId: alias_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/aliasBody'
+        required: true
+      responses:
+        "200":
+          description: OK
+      x-openapi-router-controller: tracking_server.controllers.default_controller
+  /profile:
+    post:
+      summary: Save profile attributes for an particular user
+      description: |-
+        This endpoint allows us to save information related to a particular user that either changes very infrequently or does not change at all. For example, birthday, native language, and home country.
+
+        If a profile does not exist for a user, it is created the first time you execute a `/profile` call. Subsequent calls will merge the new information with the old information in the case that the keys don't exist. In the case where keys already exist, the latest call replaces the old value with the new one.
+      operationId: profile_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/profileBody'
+        required: true
+      responses:
+        "200":
+          description: OK
+      x-openapi-router-controller: tracking_server.controllers.default_controller
+components:
+  schemas:
+    trackBody:
+      type: object
+      properties:
+        userId:
+          type: string
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/event'
+      required: ['userId','events']
+    event:
+      type: object
+      properties:
+        eventName:
+          type: string
+        metadata:
+          type: object
+        timestampUTC:
+          type: integer
+      required: ['eventName','metadata','timestampUTC']
+    aliasBody:
+      type: object
+      properties:
+        newUserId:
+          type: string
+        originalUserId:
+          type: string
+        timestampUTC:
+          type: integer
+      required: ['newUserId', 'originalUserId','timestampUTC']
+    profileBody:
+      type: object
+      properties:
+        userId:
+          type: string
+        attributes:
+          type: object
+        timestampUTC:
+          type: integer
+      required: ['userId', 'attributes', 'timestampUTC']
+

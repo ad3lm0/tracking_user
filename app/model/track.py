@@ -1,5 +1,5 @@
 from marshmallow import Schema, fields
-from model.event import Events, EventsSchema
+from model.event import EventBody, EventSchema
 
 
 class TrackBody:
@@ -14,7 +14,7 @@ class TrackBodySchema(Schema):
         error_messages={"required": {"message": "userId required", "code": 400}},
     )
     events = fields.Nested(
-        EventsSchema,
+        EventSchema,
         required=True,
         error_messages={
             "required": {"message": "originalUserId required", "code": 400}

@@ -1,14 +1,14 @@
 from marshmallow import Schema, fields, validate
 
 
-class Events:
+class EventBody:
     def __init__(self, eventName, metadata, timestampUTC):
         self.eventName = eventName
         self.metadata = metadata
         self.timestampUTC = timestampUTC
 
 
-class EventsSchema(Schema):
+class EventSchema(Schema):
     eventName = fields.String(
         required=True,
         error_messages={"required": {"message": "eventName required", "code": 400}},
