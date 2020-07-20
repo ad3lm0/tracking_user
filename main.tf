@@ -8,8 +8,8 @@ resource "aws_instance" "example" {
   instance_type = "t2.micro"
 }
 
-resource "aws_iam_role" "firehose_role_terraform" {
-  name = "firehose_test_role"
+resource "aws_iam_role" "firehose_role_userbehavior" {
+  name = "firehose_userbehavior_role"
 
   assume_role_policy = <<EOF
 {
@@ -28,9 +28,9 @@ resource "aws_iam_role" "firehose_role_terraform" {
 EOF
 }
 
-resource "aws_iam_role_policy" "firehose-stream-policy" {
-  name = "firehose-stream-policy"
-  role = "${aws_iam_role.firehose_role_terraform.id}"
+resource "aws_iam_role_policy" "firehose-userbheavior-stream-policy" {
+  name = "firehose-userbheavior-stream-policy"
+  role = "${aws_iam_role.firehose_role_userbehavior.id}"
 
  policy = <<EOF
 {
@@ -45,8 +45,8 @@ resource "aws_iam_role_policy" "firehose-stream-policy" {
             "Effect": "Allow",
             "Action": "s3:*",
             "Resource": [
-              "arn:aws:s3:::event_tracking_user_bucket",
-              "arn:aws:s3:::event_tracking_user_bucket/*"
+              "arn:aws:s3:::behavior-tracking-user-bucket",
+              "arn:aws:s3:::behavior-tracking-user-bucket/*"
             ]
       }
     ]
@@ -55,44 +55,44 @@ EOF
 }
 
 resource "aws_s3_bucket" "bucket" {
-  bucket = "event_tracking_user_bucket"
+  bucket = "behavior-tracking-user-bucket"
   acl    = "private"
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "alias_stream" {
-  name        = "terraform-firehose-alias-stream"
+  name        = "firehose-alias-stream"
   destination = "s3"
 
   s3_configuration {
-    role_arn   = "${aws_iam_role.firehose_role_terraform.arn}"
+    role_arn   = "${aws_iam_role.firehose_role_userbehavior.arn}"
     bucket_arn = "${aws_s3_bucket.bucket.arn}"
-    prefix = "sucess/alias/batch/"
+    prefix = "success/alias/batch/"
     buffer_size = "1"
     buffer_interval = "60"
   }
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "profile_stream" {
-  name        = "terraform-firehose-profile-stream"
+  name        = "firehose-profile-stream"
   destination = "s3"
 
   s3_configuration {
-    role_arn   = "${aws_iam_role.firehose_role_terraform.arn}"
+    role_arn   = "${aws_iam_role.firehose_role_userbehavior.arn}"
     bucket_arn = "${aws_s3_bucket.bucket.arn}"
-    prefix = "sucess/profile/batch/"
+    prefix = "success/profile/batch/"
     buffer_size = "1"
     buffer_interval = "60"
   }
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "track_stream" {
-  name        = "terraform-firehose-track-stream"
+  name        = "firehose-track-stream"
   destination = "s3"
 
   s3_configuration {
-    role_arn   = "${aws_iam_role.firehose_role_terraform.arn}"
+    role_arn   = "${aws_iam_role.firehose_role_userbehavior.arn}"
     bucket_arn = "${aws_s3_bucket.bucket.arn}"
-    prefix = "sucess/track/batch/"
+    prefix = "success/track/batch/"
     buffer_size = "1"
     buffer_interval = "60"
   }

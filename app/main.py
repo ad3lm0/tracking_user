@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify
 from marshmallow import ValidationError
 
 from cloud_aws.firehose_stream import KinesesFirehose
-import cloud_aws.s3_json_concat as s3_conc
+from cloud_aws.connection_strings import AWSConnectionStrings
+from cloud_aws.s3_json_concat import concat_json
 
 from model.track import TrackBody, TrackBodySchema
 from model.alias import AliasBody, AliasBodySchema
@@ -14,18 +15,35 @@ import time
 
 app = Flask(__name__)
 
-track_stream = KinesesFirehose(stream_name="firehose-trackevents-to-s3")
-alias_stream = KinesesFirehose(stream_name="firehose-alias-to-s3")
-profile_stream = KinesesFirehose(stream_name="firehose-profile-to-s3")
+aws_connections = AWSConnectionStrings()
+
+track_stream = KinesesFirehose(stream_name=aws_connections.track_stream_name)
+alias_stream = KinesesFirehose(stream_name=aws_connections.alias_stream_name)
+profile_stream = KinesesFirehose(stream_name=aws_connections.profile_stream_name)
 
 
 def s3_concat():
     starttime = time.time()
     while True:
+        # alias
         time.sleep(61.0 - ((time.time() - starttime) % 61.0))
-        s3_conc.concat_trackevents()
-        s3_conc.concat_alias()
-        s3_conc.concat_profile()
+        concat_json(
+            aws_connections.bucket,
+            aws_connections.alias_path_to_concat,
+            aws_connections.alias_concatenated_file,
+        )
+        # track
+        concat_json(
+            aws_connections.bucket,
+            aws_connections.track_path_to_concat,
+            aws_connections.track_concatenated_file,
+        )
+        # profile
+        concat_json(
+            aws_connections.bucket,
+            aws_connections.profile_path_to_concat,
+            aws_connections.profile_concatenated_file,
+        )
 
 
 @app.route("/", methods=["GET"])
@@ -88,7 +106,7 @@ def profile_handler():
 
 if __name__ == "__main__":
     recording_on = Value("b", True)
-    # p = Process(target=s3_concat)
-    # p.start()
+    p = Process(target=s3_concat)
+    p.start()
     app.run(debug=True, use_reloader=False)
-    # p.join()
+    p.join()
