@@ -1,101 +1,140 @@
 from flask import Flask
 import json
 
-alias_good_dict = {"newUserId": "65t241s", "originalUserId": "abc", "timestampUTC": 1}
-alias_bad_dict = {"newUserId": 123, "originalUserId": "abc", "timestampUTC": 1}
-profile_good_dict = {
-    "userId": "hueBRBR",
-    "attributes": {"name": "fulano"},
+good_event = {
+    "eventName": "meme",
+    "metadata": {"something": "otherthing"},
     "timestampUTC": 0,
 }
 
-track_good_dict = {
-    "userId": "huehueBRBR",
-    "events": [
-        {
-            "eventName": "meme",
-            "metadata": {"something": "otherthing"},
-            "timestampUTC": 0,
-        },
-    ],
+bad_event = {
+    "event": "meme",
+    "metadata": {"something": "otherthing"},
+    "timestampUTC": 0,
 }
 
-track_bad_dict = {
+good_track = {
     "userId": "huehueBRBR",
-    "events": [
-        {"eventName": 1, "metadata": {"something": "otherthing"}, "timestampUTC": 0,},
-    ],
+    "events": [good_event],
 }
 
 
-def test_hello_world(client):
+bad_track = {
+    "userId": "huehueBRBR",
+    "events": [bad_event],
+}
+
+
+def test_pass_helloWorld(client):
     response = client.get("/")
     assert response.status_code == 200
 
 
-def test_profile(client):
+def test_pass_profile(client):
     response = client.post(
-        "/profile/", data=json.dumps(profile_good_dict), content_type="application/json"
+        "/profile/",
+        data=json.dumps(
+            {"userId": "hueBRBR", "attributes": {"name": "fulano"}, "timestampUTC": 0,}
+        ),
+        content_type="application/json",
     )
 
     assert response.status_code == 200
 
 
-def test_profile_fail(client):
+def test_fail_profile_fieldName(client):
     response = client.post(
-        "/profile/", data=json.dumps(track_good_dict), content_type="application/json"
+        "/profile/",
+        data=json.dumps(
+            {"user": "hueBRBR", "attributes": {"name": "fulano"}, "timestampUTC": 0,}
+        ),
+        content_type="application/json",
     )
 
     assert response.status_code == 400
 
 
-def test_track(client):
+def test_fail_profile_attributeError(client):
     response = client.post(
-        "/track/", data=json.dumps(track_good_dict), content_type="application/json"
+        "/profile/",
+        data=json.dumps({"userId": "hueBRBR", "attributes": "", "timestampUTC": "0",}),
+        content_type="application/json",
+    )
+
+    assert response.status_code == 400
+
+
+def test_pass_track(client):
+    response = client.post(
+        "/track/", data=json.dumps(good_track), content_type="application/json"
     )
 
     assert response.status_code == 200
 
 
-def test_track_wrong_field1(client):
+def test_fail_track_fieldName(client):
     response = client.post(
         "/track/",
         data=json.dumps({"user": "huebr", "events": "[]"}),
         content_type="application/json",
     )
 
-    assert response.status_code == 500
+    assert response.status_code == 400
 
 
-def test_track_wrong_field2(client):
+def test_fail_track_nestedEventFieldName(client):
     response = client.post(
-        "/track/",
-        data=json.dumps({"userId": "huebr", "event": "[]"}),
-        content_type="application/json",
-    )
-
-    assert response.status_code == 500
-
-
-def test_alias(client):
-    response = client.post(
-        "/alias/", data=json.dumps(alias_good_dict), content_type="application/json"
-    )
-
-    assert response.status_code == 200
-
-
-def test_alias_fail(client):
-    response = client.post(
-        "/alias/", data=json.dumps(track_good_dict), content_type="application/json"
+        "/track/", data=json.dumps(bad_track), content_type="application/json",
     )
 
     assert response.status_code == 400
 
 
-def test_alias_bad_data(client):
+def test_fail_track_wrongFieldName(client):
     response = client.post(
-        "/alias/", data=json.dumps(track_good_dict), content_type="application/json"
+        "/track/",
+        data=json.dumps({"userId": "huebr", "eve": "[]"}),
+        content_type="application/json",
+    )
+
+    assert response.status_code == 400
+
+
+def test_fail_track_emptyEvent(client):
+    response = client.post(
+        "/track/",
+        data=json.dumps({"userId": "huebr", "events": "[]"}),
+        content_type="application/json",
+    )
+
+    assert response.status_code == 400
+
+
+def test_pass_alias(client):
+    response = client.post(
+        "/alias/",
+        data=json.dumps({"newUserId": 123, "originalUserId": "abc", "timestampUTC": 1}),
+        content_type="application/json",
+    )
+
+    assert response.status_code == 200
+
+
+def test_fail_alias_fieldName(client):
+    response = client.post(
+        "/alias/",
+        data=json.dumps({"userId": 123, "originalUserId": "abc", "timestampUTC": 1}),
+        content_type="application/json",
+    )
+
+    assert response.status_code == 400
+
+
+def test_fail_alias_badData(client):
+    response = client.post(
+        "/alias/",
+        data=json.dumps({"newUserId": 123, "originalUserId": "abc"}),
+        content_type="application/json",
     )
 
     assert response.status_code == 400

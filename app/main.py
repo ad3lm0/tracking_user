@@ -53,27 +53,15 @@ def index():
 
 @app.route("/track/", methods=["POST"])
 def track_handler():
-    json_request = request.get_json()
-    if "userId" not in json_request:
-        raise TypeError("'userId' is a required field for this method")
-
-    if "events" not in json_request:
-        raise TypeError("'events' is a required field for this method")
     try:
-        tracked_user = json_request["userId"]
-        tracked_events = []
-        for events in json_request["events"]:
-            event = EventBody(**events)
-            tracked_events.append(event)
-
-        track = TrackBody(userId=tracked_user, events=tracked_events)
+        track = TrackBody(**request.get_json())
         track_schema = TrackBodySchema()
         schema_check = track_schema.dump(track)
-        result = track_stream.post(request.get_json())
-        return result
+        # result = track_stream.post(request.get_json())
+        return schema_check
 
     except TypeError as err:
-        return jsonify(str(err))
+        return jsonify(str(err)), 400
 
 
 @app.route("/alias/", methods=["POST"])
@@ -103,10 +91,13 @@ def profile_handler():
     except TypeError as err:
         return jsonify(str(err)), 400
 
+    except AttributeError as err:
+        return jsonify({"error": "attribute is not the right type"}), 400
+
 
 if __name__ == "__main__":
     recording_on = Value("b", True)
-    p = Process(target=s3_concat)
-    p.start()
+    # p = Process(target=s3_concat)
+    # p.start()
     app.run(debug=True, use_reloader=False)
-    p.join()
+# p.join()
