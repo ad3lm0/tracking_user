@@ -97,7 +97,7 @@ def profile_handler():
 
 if __name__ == "__main__":
     recording_on = Value("b", True)
-    # p = Process(target=s3_concat)
-    # p.start()
+    p = Process(target=s3_concat)
+    p.start()
     app.run(debug=True, use_reloader=False)
-# p.join()
+    p.join()

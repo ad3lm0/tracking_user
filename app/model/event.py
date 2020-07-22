@@ -6,7 +6,7 @@ class EventBody:
         self.eventName = eventName
         self.metadata = metadata
         self.timestampUTC = timestampUTC
-        
+
 
 class EventSchema(Schema):
     eventName = fields.String(
