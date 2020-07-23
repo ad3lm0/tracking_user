@@ -57,8 +57,8 @@ def track_handler():
         track = TrackBody(**request.get_json())
         track_schema = TrackBodySchema()
         schema_check = track_schema.dump(track)
-        # result = track_stream.post(request.get_json())
-        return schema_check
+        result = track_stream.post(request.get_json())
+        return result
 
     except TypeError as err:
         return jsonify(str(err)), 400
