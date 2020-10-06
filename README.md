@@ -39,13 +39,13 @@ pip install -r requirements.txt
 python app\main.py
 ```
 
-you may change the values at app\cloud_aws\connection_strings.py as needed
+you may change the variable at app\cloud_aws\connection_strings.py as needed
 
 the payload and format are described in the swagger file at swagger\swagger.yml
 
 ## TODO
 - more TESTS!
-- Correct behavior on the /profile/ endpoint to merge/update the user attributes as needed
+- ~~Correct behavior on the /profile/ endpoint to merge/update the user attributes as needed,~~ there was a wrong definition on the swagger file
 - MORE TESTS!
 - Deployable container using Docker
 - tests... ?!!
